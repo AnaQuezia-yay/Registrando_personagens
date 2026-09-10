@@ -17,10 +17,10 @@ def init_db():
     conn.commit()
     conn.close()
 
-@app.route('/personagem', methods=['GET'])
+@app.route('/personagens', methods=['GET'])
 def listar_personagens():
     """
-    Lista todos os personagens.
+    Lista todos os personagens cadastrados.
     ---
     responses:
       200:
@@ -39,14 +39,44 @@ def listar_personagens():
     conn.close()
     return jsonify(personagens)
 
-@app.route('/personagem', methods=['POST'])
+@app.route('/personagens', methods=['POST'])
 def adicionar_personagem():
     """
     Cadastra um novo personagem.
     ---
+    parameters:
+      - name: body
+        in: body
+        required: true
+        schema:
+          type: object
+          required:
+            - nome
+            - genero
+          properties:
+            nome:
+              type: string
+              example: "Lara Croft"
+            nascimento:
+              type: string
+              example: "14/02/1992"
+            idade:
+              type: integer
+              example: 31
+            funcao:
+              type: string
+              example: "Arqueóloga"
+            nivel:
+              type: string
+              example: "Avançado"
+            genero:
+              type: string
+              example: "Feminino"
     responses:
       201:
-        description: Sucesso.
+        description: Personagem cadastrado com sucesso.
+      400:
+        description: Erro de validação.
     """
     novo = request.json
     if not novo.get('nome') or not novo.get('genero'):
@@ -56,19 +86,49 @@ def adicionar_personagem():
     c = conn.cursor()
     c.execute('''INSERT INTO personagem (nome, nascimento, idade, funcao, nivel, genero) 
                  VALUES (?, ?, ?, ?, ?, ?)''', 
-              (novo['nome'], novo['nascimento'], novo['idade'], novo['funcao'], novo['nivel'], novo['genero']))
+              (novo['nome'], novo.get('nascimento'), novo.get('idade'), novo.get('funcao'), novo.get('nivel'), novo['genero']))
     conn.commit()
     conn.close()
     return jsonify({'mensagem': 'Personagem cadastrado com sucesso!'}), 201
 
-@app.route('/personagem/<int:id>', methods=['PUT'])
+@app.route('/personagens/<int:id>', methods=['PUT'])
 def atualizar_personagem(id):
     """
-    Atualiza um personagem.
+    Atualiza os dados de um personagem.
     ---
+    parameters:
+      - name: id
+        in: path
+        type: integer
+        required: true
+        description: ID do personagem a ser atualizado.
+      - name: body
+        in: body
+        required: true
+        schema:
+          type: object
+          properties:
+            nome:
+              type: string
+              example: "Lara Croft"
+            nascimento:
+              type: string
+              example: "14/02/1992"
+            idade:
+              type: integer
+              example: 32
+            funcao:
+              type: string
+              example: "Aventureira"
+            nivel:
+              type: string
+              example: "Mestre"
+            genero:
+              type: string
+              example: "Feminino"
     responses:
       200:
-        description: Sucesso.
+        description: Personagem atualizado com sucesso.
     """
     dados = request.json
     conn = sqlite3.connect('personagem.db')
@@ -76,19 +136,25 @@ def atualizar_personagem(id):
     c.execute('''UPDATE personagem 
                  SET nome = ?, nascimento = ?, idade = ?, funcao = ?, nivel = ?, genero = ? 
                  WHERE id = ?''', 
-              (dados['nome'], dados['nascimento'], dados['idade'], dados['funcao'], dados['nivel'], dados['genero'], id))
+              (dados['nome'], dados.get('nascimento'), dados.get('idade'), dados.get('funcao'), dados.get('nivel'), dados['genero'], id))
     conn.commit()
     conn.close()
     return jsonify({'mensagem': 'Personagem atualizado!'})
 
-@app.route('/personagem/<int:id>', methods=['DELETE'])
+@app.route('/personagens/<int:id>', methods=['DELETE'])
 def excluir_personagem(id):
     """
-    Exclui um personagem.
+    Exclui um personagem do banco de dados.
     ---
+    parameters:
+      - name: id
+        in: path
+        type: integer
+        required: true
+        description: ID do personagem a ser excluído.
     responses:
       200:
-        description: Sucesso.
+        description: Personagem excluído com sucesso.
     """
     conn = sqlite3.connect('personagem.db')
     c = conn.cursor()
