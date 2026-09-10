@@ -17,7 +17,7 @@ def init_db():
     conn.commit()
     conn.close()
 
-@app.route('/personagens', methods=['GET'])
+@app.route('/personagem', methods=['GET'])
 def listar_personagens():
     """
     Lista todos os personagens.
@@ -39,7 +39,7 @@ def listar_personagens():
     conn.close()
     return jsonify(personagens)
 
-@app.route('/personagens', methods=['POST'])
+@app.route('/personagem', methods=['POST'])
 def adicionar_personagem():
     """
     Cadastra um novo personagem.
@@ -61,7 +61,7 @@ def adicionar_personagem():
     conn.close()
     return jsonify({'mensagem': 'Personagem cadastrado com sucesso!'}), 201
 
-@app.route('/personagens/<int:id>', methods=['PUT'])
+@app.route('/personagem/<int:id>', methods=['PUT'])
 def atualizar_personagem(id):
     """
     Atualiza um personagem.
@@ -81,7 +81,7 @@ def atualizar_personagem(id):
     conn.close()
     return jsonify({'mensagem': 'Personagem atualizado!'})
 
-@app.route('/personagens/<int:id>', methods=['DELETE'])
+@app.route('/personagem/<int:id>', methods=['DELETE'])
 def excluir_personagem(id):
     """
     Exclui um personagem.
