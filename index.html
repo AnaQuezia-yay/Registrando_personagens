@@ -1,0 +1,151 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <title>Catálogo de Personagens</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <div class="container">
+        <h1 id="tituloForm">Cadastrar Personagem</h1>
+        <form id="formPersonagem">
+            <input type="hidden" id="personagemId"> 
+            <input type="text" id="nome" placeholder="Nome do Personagem" required>
+            <input type="text" id="nascimento" placeholder="Origem (Onde nasceu)" required>
+            <input type="number" id="idade" placeholder="Idade Atual" required>
+            <input type="text" id="funcao" placeholder="Função Exercida do Personagem" required>
+            <input type="text" id="nivel" placeholder="Nível do Personagem" required>
+            <select id="genero" required>
+    <option value="" disabled selected>Selecione o Gênero</option>
+    <option value="Masculino">Masculino</option>
+    <option value="Feminino">Feminino</option>
+    <option value="Prefere não dizer">Prefere não dizer</option>
+</select>
+            
+            <button type="submit" id="btnSalvar">Salvar Personagem</button>
+            <button type="button" id="btnCancelar" class="btn-cancelar" onclick="limparFormulario()">Cancelar</button>
+        </form>
+    </div>
+
+    <div class="container">
+        <h2>Personagens Registrados</h2>
+        <input type="text" id="pesquisa" placeholder="🔍 Pesquisar por Origem..." onkeyup="filtrarPersonagens()">
+        <div id="listaPersonagens"></div>
+    </div>
+
+    <script>
+        const API_URL = 'http://localhost:5000/personagens';
+        let listaGlobalPersonagens = []; 
+
+        async function carregarPersonagens() {
+            try {
+                const resposta = await fetch(API_URL);
+                if (!resposta.ok) throw new Error("Erro na rede");
+                listaGlobalPersonagens = await resposta.json();
+                renderizarLista(listaGlobalPersonagens);
+            } catch (erro) {
+                document.getElementById('listaPersonagens').innerHTML = '<p style="color:red; text-align:center;">Erro ao conectar. Ligue o servidor Python!</p>';
+            }
+        }
+
+        function renderizarLista(personagens) {
+            const divLista = document.getElementById('listaPersonagens');
+            divLista.innerHTML = '';
+            
+            if(personagens.length === 0) {
+                divLista.innerHTML = '<p style="text-align:center; color:#666;">Nenhum personagem encontrado.</p>';
+                return;
+            }
+
+            personagens.forEach(p => {
+                divLista.innerHTML += `
+                    <div class="personagem-item">
+                        <div class="infos">
+                            <strong>${p.nome}</strong> (${p.idade} anos)<br>
+                            <strong>${p.genero}</strong> | <strong>${p.funcao}</strong> (${p.nivel})<br>
+                            <small>Origem: ${p.nascimento}</small>
+                        </div>
+                        <div class="acoes">
+                            <button class="btn-editar" onclick="prepararEdicao(${p.id}, '${escapeHtml(p.nome)}', '${escapeHtml(p.nascimento)}', ${p.idade}, '${escapeHtml(p.funcao)}', '${escapeHtml(p.nivel)}', '${escapeHtml(p.genero)}')">Editar</button>
+                            <button class="btn-excluir" onclick="excluirPersonagem(${p.id})">Excluir</button>
+                        </div>
+                    </div>
+                `;
+            });
+        }
+
+        function filtrarPersonagens() {
+            const termo = document.getElementById('pesquisa').value.toLowerCase();
+            const filtrados = listaGlobalPersonagens.filter(p => p.nome.toLowerCase().includes(termo));
+            renderizarLista(filtrados);
+        }
+
+        document.getElementById('formPersonagem').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const id = document.getElementById('personagemId').value;
+            
+            const dadosPersonagem = {
+                nome: document.getElementById('nome').value,
+                nascimento: document.getElementById('nascimento').value,
+                idade: parseInt(document.getElementById('idade').value),
+                funcao: document.getElementById('funcao').value,
+                nivel: document.getElementById('nivel').value,
+                genero: document.getElementById('genero').value
+            };
+
+            const configFetch = {
+                method: id ? 'PUT' : 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(dadosPersonagem)
+            };
+
+            const urlFinal = id ? `${API_URL}/${id}` : API_URL;
+
+            try {
+                await fetch(urlFinal, configFetch);
+                limparFormulario();
+                carregarPersonagens();
+            } catch (erro) {
+                alert("Erro ao salvar o personagem.");
+            }
+        });
+
+        async function excluirPersonagem(id) {
+            if (confirm('Tem certeza que deseja excluir este personagem?')) {
+                await fetch(`${API_URL}/${id}`, { method: 'DELETE' });
+                carregarPersonagens();
+            }
+        }
+
+        function prepararEdicao(id, nome, nascimento, idade, funcao, nivel, genero) {
+            document.getElementById('personagemId').value = id;
+            document.getElementById('nome').value = nome;
+            document.getElementById('nascimento').value = nascimento;
+            document.getElementById('idade').value = idade;
+            document.getElementById('funcao').value = funcao;
+            document.getElementById('nivel').value = nivel;
+            document.getElementById('genero').value = genero;
+            
+            document.getElementById('tituloForm').innerText = 'Editar Personagem';
+            document.getElementById('btnSalvar').innerText = 'Atualizar Personagem';
+            document.getElementById('btnCancelar').style.display = 'block';
+            window.scrollTo(0, 0);
+        }
+
+        function limparFormulario() {
+            document.getElementById('formPersonagem').reset();
+            document.getElementById('personagemId').value = '';
+            document.getElementById('tituloForm').innerText = 'Cadastrar Personagem';
+            document.getElementById('btnSalvar').innerText = 'Salvar Personagem';
+            document.getElementById('btnCancelar').style.display = 'none';
+        }
+
+        function escapeHtml(str) { 
+            return String(str).replace(/'/g, "\\'").replace(/"/g, '&quot;'); 
+        }
+
+        // Inicia a listagem ao abrir a página
+        carregarPersonagens();
+    </script>
+</body>
+</html>
