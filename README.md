@@ -1,5 +1,5 @@
-# 🎬 Catálogo de Filmes e Séries
-Um sistema CRUD Full-Stack desenvolvido para gerenciar Personagens. 
+# 🎬 Catálogo de Personagens
+Sistema CRUD Full-Stack desenvolvido para gerenciar Personagens. 
 
 ## 🛠️ Tecnologias
 * **Frontend:** HTML, CSS Moderno e JavaScript
