@@ -1,4 +1,4 @@
-# 🎬 Catálogo de Filmes e Séries
+# 🎬 Catálogo de Personagens
 Um sistema CRUD Full-Stack desenvolvido para gerenciar Personagens. 
 
 ## 🛠️ Tecnologias
