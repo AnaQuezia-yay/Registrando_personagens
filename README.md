@@ -1,5 +1,5 @@
 # 🎬 Catálogo de Personagens
-Sistema CRUD Full-Stack desenvolvido para gerenciar Personagens. 
+Um sistema CRUD Full-Stack desenvolvido para gerenciar Personagens. 
 
 ## 🛠️ Tecnologias
 * **Frontend:** HTML, CSS Moderno e JavaScript
